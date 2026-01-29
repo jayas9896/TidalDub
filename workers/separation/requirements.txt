@@ -1,0 +1,17 @@
+# Separation Worker Dependencies
+# ==============================
+# For audio source separation using Demucs
+
+# Core ML
+torch>=2.0
+torchaudio>=2.0
+
+# Audio separation
+demucs>=4.0
+
+# Audio processing
+numpy>=1.24
+scipy>=1.10
+
+# Utilities
+tqdm>=4.64

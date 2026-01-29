@@ -1,0 +1,16 @@
+# Translation Worker Dependencies
+# ================================
+# For text translation using Seamless M4T or Argos Translate
+
+# Core ML
+torch>=2.0
+
+# Seamless M4T (Meta's multilingual translation)
+seamless_communication>=1.0
+
+# Alternative: Argos Translate (lighter, no GPU required)
+# argostranslate>=1.9
+
+# Utilities
+numpy>=1.24
+tqdm>=4.64

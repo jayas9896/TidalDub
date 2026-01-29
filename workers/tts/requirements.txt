@@ -1,0 +1,22 @@
+# TTS Worker Dependencies
+# ========================
+# For text-to-speech with voice cloning using Coqui TTS
+
+# Core ML
+torch>=2.0
+torchaudio>=2.0
+
+# Coqui TTS with XTTS v2 (voice cloning)
+TTS>=0.20
+
+# Audio processing
+numpy>=1.24
+scipy>=1.10
+librosa>=0.10
+
+# Time stretching for duration alignment
+pyrubberband>=0.3  # Requires rubberband CLI
+# Alternative: libtsm (pure Python)
+
+# Utilities
+tqdm>=4.64

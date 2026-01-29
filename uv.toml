@@ -1,0 +1,29 @@
+# uv Workspace Configuration
+# ==========================
+# Manages all TidalDub packages as a monorepo
+# Updated: Jan 2026 - Using PyTorch 2.10+ with CUDA 13
+
+[workspace]
+members = [
+    ".",                    # Main orchestrator package
+    "workers/separation",
+    "workers/transcription",
+    "workers/diarization",
+    "workers/translation",
+    "workers/tts",
+    "workers/mixing",
+]
+
+# Shared resolver settings
+[tool.uv]
+python = ">=3.12"
+
+# Use CUDA 13 for all PyTorch packages (RTX 5070 compatible)
+[tool.uv.sources]
+torch = { index = "pytorch-cuda" }
+torchaudio = { index = "pytorch-cuda" }
+
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true  # Only use for torch packages

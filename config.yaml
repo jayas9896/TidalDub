@@ -1,0 +1,198 @@
+# TidalDub Configuration
+# ======================
+# Optimized for MSI Crosshair 18 HX - RTX 5070 8GB VRAM
+# With Performance Optimizations Enabled
+
+# Project paths
+paths:
+  state_dir: "./state"
+  data_dir: "./data"
+  models_dir: "./models"
+  temp_dir: "./data/temp"
+  output_dir: "./data/output"
+
+# Target languages for dubbing
+languages:
+  # Audio dubbing - these will get full voice synthesis
+  audio:
+    - es  # Spanish
+    - fr  # French
+    - de  # German
+    - pt  # Portuguese
+    - it  # Italian
+    - ja  # Japanese
+    - ko  # Korean
+    - zh  # Chinese (Mandarin)
+    - hi  # Hindi
+    - ar  # Arabic
+  
+  # Subtitles - these will get text subtitles
+  subtitles:
+    - es
+    - fr
+    - de
+    - pt
+    - it
+    - ja
+    - ko
+    - zh
+    - hi
+    - ar
+    - ru  # Russian
+    - nl  # Dutch
+    - pl  # Polish
+    - tr  # Turkish
+    - vi  # Vietnamese
+
+# Quality presets - Optimized for 8GB VRAM
+quality:
+  preset: "balanced"  # Options: fast, balanced, quality
+  
+  presets:
+    fast:
+      whisper_model: "small"           # ~2GB VRAM with faster-whisper
+      whisper_backend: "faster-whisper"
+      tts_model: "xtts_v2"             # ~4GB VRAM
+      separation_model: "htdemucs"      # ~4GB VRAM
+      translation_model: "medium"       # ~3GB VRAM
+      chunk_duration_sec: 600           # 10 min chunks
+      
+    balanced:
+      whisper_model: "medium"          # ~3GB VRAM with faster-whisper
+      whisper_backend: "faster-whisper"
+      tts_model: "xtts_v2"             # ~4GB VRAM
+      separation_model: "htdemucs"      # ~4GB VRAM
+      translation_model: "large"        # ~5GB VRAM
+      chunk_duration_sec: 300           # 5 min chunks
+      
+    quality:
+      whisper_model: "large-v3"        # ~3GB VRAM with faster-whisper (vs 6GB original)
+      whisper_backend: "faster-whisper"
+      tts_model: "xtts_v2"             # ~4GB VRAM
+      separation_model: "htdemucs_ft"   # ~6GB VRAM
+      translation_model: "large"        # ~5GB VRAM
+      chunk_duration_sec: 180           # 3 min chunks
+
+# Worker configuration - OPTIMIZED FOR PERFORMANCE
+workers:
+  # GPU workers: Sequential (8GB VRAM constraint)
+  separation: 1      # GPU-bound
+  transcription: 1   # GPU-bound
+  diarization: 1     # GPU-bound
+  translation: 1     # GPU-bound
+  tts: 1             # GPU-bound
+  
+  # CPU workers: PARALLEL (uses 24 cores efficiently)
+  mixing: 4          # CPU-bound - parallel processing!
+  
+  # Async settings
+  async:
+    enabled: true
+    poll_interval_ms: 100  # Fast polling for instant task pickup
+
+# Queue configuration - OPTIMIZED FOR SPEED
+queues:
+  # Use Redis for instant pub/sub notifications
+  use_redis: true
+  redis_url: "redis://localhost:6379/0"
+  
+  # SQLite fallback (still fast with WAL mode)
+  sqlite_wal_mode: true
+  
+  # Retry configuration
+  max_retries: 3
+  retry_delay_base_sec: 5  # Reduced for faster recovery
+  
+  # DLQ settings
+  dlq_auto_retry_transient: true
+  
+  # Pub/sub for instant notifications
+  pubsub:
+    enabled: true
+    channel_prefix: "tidaldub:notify"
+
+# Logging
+logging:
+  level: "INFO"
+  file: "./logs/tidaldub.log"
+  max_size_mb: 100
+  backup_count: 5
+
+# GPU configuration - Optimized for RTX 5070 8GB GDDR7
+gpu:
+  device: "cuda:0"
+  
+  # Memory management for 8GB VRAM
+  max_memory_fraction: 0.85  # Leave headroom for system
+  
+  # Performance optimizations
+  performance:
+    # torch.compile for 2-3x faster inference
+    torch_compile:
+      enabled: true
+      mode: "reduce-overhead"  # Best for inference
+    
+    # Flash Attention 2 for memory efficiency
+    flash_attention:
+      enabled: true
+    
+    # TF32 for faster matrix operations
+    tf32:
+      enabled: true
+    
+    # CUDA Graphs (reduces kernel launch overhead)
+    cuda_graphs:
+      enabled: true
+  
+  # PyTorch memory allocator optimization
+  pytorch_cuda_alloc_conf: "expandable_segments:True"
+  
+  # Clear cache between stages to free VRAM
+  clear_cache_between_stages: true
+
+# Hardware-specific settings for MSI Crosshair 18 HX
+hardware:
+  system: "MSI Crosshair 18 HX"
+  cpu: "Intel Core Ultra 9 275HX"
+  cpu_cores: 24
+  gpu: "NVIDIA RTX 5070"
+  gpu_vram_gb: 8
+  ram_gb: 32
+  storage_type: "NVMe SSD"
+  
+  # CPU optimization
+  cpu_optimization:
+    # Number of threads for FFmpeg/audio processing
+    omp_num_threads: 12  # Half of cores (leave for system)
+    mkl_num_threads: 12
+    
+    # Process pool for parallel CPU work
+    process_pool_workers: 4
+    
+    # Thread pool for async I/O
+    thread_pool_workers: 8
+  
+  # Processing optimizations
+  use_cpu_offload: false  # Enable if OOM errors occur
+  batch_size_limit: 1     # Keep at 1 for 8GB VRAM
+  
+  # Audio processing
+  sample_rate: 44100
+  audio_format: "wav"
+
+# Pipeline optimization
+pipeline:
+  # Enable pipeline streaming (start next stage before current finishes)
+  streaming:
+    enabled: true
+    # Queue next stage as soon as this % of current stage completes
+    stream_threshold_percent: 50
+  
+  # Parallel language processing
+  parallel_languages:
+    # For translation: process up to N languages in parallel (CPU has capacity)
+    translation: 1  # Keep at 1 (GPU-bound)
+    # For TTS: process one at a time (GPU-bound)
+    tts: 1
+    # For mixing: process all languages in parallel (CPU-bound!)
+    mixing: 4  # Process 4 languages simultaneously

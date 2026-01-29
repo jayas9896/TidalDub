@@ -1,0 +1,20 @@
+# Diarization Worker Dependencies
+# ================================
+# For speaker identification using pyannote-audio
+
+# Core ML
+torch>=2.0
+torchaudio>=2.0
+
+# Speaker diarization
+pyannote.audio>=3.0
+
+# Speaker embeddings (for voice consistency)
+speechbrain>=0.5
+
+# Audio processing
+numpy>=1.24
+scipy>=1.10
+
+# Utilities
+tqdm>=4.64

@@ -1,0 +1,18 @@
+# Transcription Worker Dependencies
+# ==================================
+# For speech-to-text using OpenAI Whisper
+
+# Core ML
+torch>=2.0
+torchaudio>=2.0
+
+# Whisper (choose one)
+openai-whisper>=20231117  # Original OpenAI implementation
+# faster-whisper>=0.9      # CTranslate2 optimized (optional, faster)
+
+# Audio processing
+numpy>=1.24
+scipy>=1.10
+
+# Utilities
+tqdm>=4.64

@@ -1,0 +1,53 @@
+[project]
+name = "tidaldub-transcription"
+version = "0.1.0"
+description = "Speech-to-text transcription worker using faster-whisper"
+requires-python = ">=3.12,<3.15"
+
+dependencies = [
+    # PyTorch ecosystem
+    "torch>=2.10.0",
+    "torchaudio>=2.10.0",
+    
+    # Whisper - use faster-whisper for better VRAM efficiency
+    # Standard whisper uses ~6GB for large-v3
+    # faster-whisper uses ~3GB for large-v3 (CTranslate2 optimized)
+    "faster-whisper>=1.1.0",
+    
+    # Numerical
+    "numpy>=2.2.2",
+    "scipy>=1.15.1",
+    
+    # Progress
+    "tqdm>=4.67.1",
+    
+    # Config
+    "pyyaml>=6.0.2",
+]
+
+[project.optional-dependencies]
+# If you want original OpenAI Whisper instead
+original = [
+    "openai-whisper>=20240930",
+]
+dev = [
+    "pytest>=8.3.4",
+]
+
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+# RTX 5070 8GB VRAM optimization:
+# Use faster-whisper (CTranslate2) for 50% less VRAM usage
+# large-v3: ~3GB VRAM vs 6GB with original whisper
+
+[tool.uv.sources]
+torch = { index = "pytorch-cuda" }
+torchaudio = { index = "pytorch-cuda" }
+
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true

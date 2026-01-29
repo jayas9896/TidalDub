@@ -1,0 +1,22 @@
+# TidalDub Orchestrator Dependencies
+# ===================================
+
+# Configuration
+pyyaml>=6.0
+
+# Database
+sqlalchemy>=2.0
+
+# Queue (optional - for Redis support)
+redis>=4.5
+
+# CLI
+click>=8.0
+rich>=13.0
+
+# Web UI (optional)
+flask>=2.3
+
+# Utilities
+python-dateutil>=2.8
+filelock>=3.12

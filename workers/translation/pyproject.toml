@@ -1,0 +1,48 @@
+[project]
+name = "tidaldub-translation"
+version = "0.1.0"
+description = "Translation worker using SeamlessM4T"
+requires-python = ">=3.12,<3.15"
+
+dependencies = [
+    # PyTorch ecosystem
+    "torch>=2.10.0",
+    
+    # Seamless M4T for high-quality translation
+    # Uses ~4-5GB VRAM for large model
+    "seamless-communication>=1.1.0",
+    
+    # Numerical
+    "numpy>=2.2.2",
+    
+    # Progress
+    "tqdm>=4.67.1",
+    
+    # Config
+    "pyyaml>=6.0.2",
+]
+
+[project.optional-dependencies]
+# Lighter alternative (CPU-friendly, fewer languages)
+argos = [
+    "argostranslate>=1.9.6",
+]
+dev = [
+    "pytest>=8.3.4",
+]
+
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+# RTX 5070 8GB VRAM: SeamlessM4T large uses ~4-5GB VRAM
+# For lower VRAM, use medium model or argos fallback
+
+[tool.uv.sources]
+torch = { index = "pytorch-cuda" }
+
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true

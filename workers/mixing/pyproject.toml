@@ -1,0 +1,39 @@
+[project]
+name = "tidaldub-mixing"
+version = "0.1.0"
+description = "Professional audio mixing worker"
+requires-python = ">=3.12"
+
+dependencies = [
+    # Audio processing - no GPU needed
+    "numpy>=2.2.2",
+    "scipy>=1.15.1",
+    
+    # PyDub for audio manipulation
+    "pydub>=0.25.1",
+    
+    # FFmpeg bindings
+    "ffmpeg-python>=0.2.0",
+    
+    # Loudness normalization
+    "pyloudnorm>=0.1.1",
+    
+    # Audio file I/O
+    "soundfile>=0.13.1",
+    
+    # Config
+    "pyyaml>=6.0.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.4",
+]
+
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+# Mixing worker is CPU-only, no GPU required
+# Requires FFmpeg installed: winget install ffmpeg

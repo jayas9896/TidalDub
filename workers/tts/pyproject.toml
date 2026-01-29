@@ -1,0 +1,56 @@
+[project]
+name = "tidaldub-tts"
+version = "0.1.0"
+description = "Text-to-speech worker with voice cloning using Coqui TTS"
+requires-python = ">=3.12,<3.15"
+
+dependencies = [
+    # PyTorch ecosystem
+    "torch>=2.10.0",
+    "torchaudio>=2.10.0",
+    
+    # Coqui TTS with XTTS v2 voice cloning
+    # XTTS v2 uses ~4-5GB VRAM
+    "TTS>=0.22.0",
+    
+    # Audio processing
+    "numpy>=2.2.2",
+    "scipy>=1.15.1",
+    "librosa>=0.10.2.post1",
+    
+    # Time stretching
+    "soundfile>=0.13.1",
+    
+    # Progress
+    "tqdm>=4.67.1",
+    
+    # Config
+    "pyyaml>=6.0.2",
+]
+
+[project.optional-dependencies]
+# Alternative lighter TTS (offloads to CPU)
+piper = [
+    "piper-tts>=1.2.0",
+]
+dev = [
+    "pytest>=8.3.4",
+]
+
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+# RTX 5070 8GB VRAM: XTTS v2 uses ~4-5GB VRAM
+# Enable attention slicing for lower memory usage
+# Set PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+[tool.uv.sources]
+torch = { index = "pytorch-cuda" }
+torchaudio = { index = "pytorch-cuda" }
+
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true

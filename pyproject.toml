@@ -1,0 +1,95 @@
+[project]
+name = "tidaldub"
+version = "0.1.0"
+description = "Fully local video dubbing pipeline with enterprise-grade reliability"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+authors = [
+    { name = "TidalDub Team" }
+]
+keywords = ["dubbing", "video", "audio", "translation", "tts", "voice-cloning"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Multimedia :: Video",
+]
+
+dependencies = [
+    # Configuration
+    "pyyaml>=6.0.2",
+    
+    # Database
+    "sqlalchemy>=2.0.36",
+    
+    # Queue (optional Redis support)
+    "redis>=5.2.1",
+    
+    # CLI
+    "click>=8.1.8",
+    "rich>=13.9.4",
+    
+    # Web UI (optional)
+    "flask>=3.1.0",
+    
+    # Utilities
+    "python-dateutil>=2.9.0",
+    "filelock>=3.16.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "pytest-asyncio>=0.25.2",
+    "mypy>=1.14.1",
+    "ruff>=0.9.3",
+]
+
+[project.scripts]
+tidaldub = "tidaldub.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["tidaldub"]
+
+[tool.uv]
+# Use uv for dependency management
+# Install with: uv sync
+# Run with: uv run tidaldub
+
+[tool.uv.sources]
+# PyTorch 2.10+ with CUDA 13 for RTX 5070
+torch = { index = "pytorch-cuda" }
+torchaudio = { index = "pytorch-cuda" }
+
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+asyncio_mode = "auto"
