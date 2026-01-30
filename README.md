@@ -1,164 +1,199 @@
 # TidalDub 🌊🎬
 
-**Fully local video dubbing pipeline with enterprise-grade reliability.**
+**Enterprise-grade, fully local video dubbing pipeline with AI-powered voice cloning.**
 
-TidalDub automatically dubs video content into multiple languages using:
-- 🎤 Voice cloning (preserves original speaker voices)
-- 🔊 Professional audio separation & mixing
-- 📝 Multi-language subtitles
-- 💾 Crash-proof state management (File FSM + SQLite)
+Transform any video into multiple languages while preserving original speaker voices, emotions, and timing. Built for reliability with crash-proof state management and optimized for NVIDIA RTX GPUs.
 
-## Features
+---
 
-### Audio Processing
-- **Demucs** - Separates vocals, music, drums, bass, and sound effects
-- **Whisper** - State-of-the-art speech-to-text with word timestamps
-- **pyannote-audio** - Speaker diarization (who said what)
+## 🎯 What TidalDub Does
 
-### Translation & Synthesis
-- **SeamlessM4T** - Meta's multilingual translation (100+ languages)
-- **Coqui XTTS v2** - Voice cloning TTS (maintains speaker identity)
-- **Duration alignment** - Dubbed audio matches original timing
+TidalDub takes a video file and automatically:
 
-### Professional Output
-- Multi-track MKV with selectable audio/subtitle languages
-- Broadcast-standard loudness normalization (-16 LUFS)
-- Optional web UI for monitoring
+1. **Extracts and separates audio** → Isolates vocals from music, effects, and background
+2. **Transcribes speech** → Converts speech to text with precise word timestamps
+3. **Identifies speakers** → Determines who said what (speaker diarization)
+4. **Translates content** → Converts text to 100+ target languages
+5. **Clones voices** → Synthesizes speech in target languages using original speaker voices
+6. **Mixes professionally** → Combines dubbed audio with original background and music
+7. **Outputs MKV** → Creates final video with selectable audio tracks and subtitles
 
-### Reliability
-- **File-based FSM** - Ground truth state survives anything
-- **SQLite cache** - Fast queries, auto-rebuilt if corrupted
-- **Dead Letter Queue** - Failed tasks don't block the pipeline
-- **Checkpoint recovery** - Resume from exact crash point
+**Result:** A professional-quality dubbed video with multi-language audio tracks and subtitles, all processed locally on your machine.
 
-## Installation
+---
 
-### Prerequisites
-- Python 3.10+
-- NVIDIA GPU with 12GB+ VRAM (24GB recommended)
-- FFmpeg installed and in PATH
-- ~20GB for AI models
+## ✨ Key Features
 
-### Quick Start
+| Category | Features |
+|----------|----------|
+| **Audio AI** | Demucs source separation, faster-whisper transcription, pyannote speaker diarization |
+| **Translation** | SeamlessM4T (100+ languages), preserves context and nuance |
+| **Voice Cloning** | Coqui XTTS v2, maintains speaker identity across languages |
+| **Audio Quality** | Professional mixing with EQ, reverb, compression, -16 LUFS loudness |
+| **Output** | Multi-track MKV, selectable audio/subtitle tracks, WebVTT/SRT subtitles |
+| **Reliability** | File-based FSM, SQLite caching, Dead Letter Queue, crash recovery |
+| **Performance** | torch.compile, Flash Attention 2, parallel mixing, pipeline streaming |
 
-```bash
-# Clone the repository
-cd tidal-whirlpool
+---
 
-# Create main venv
-python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Linux/Mac
+## 🖥️ Hardware Requirements
 
-# Install orchestrator
-pip install -e .
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| **GPU** | NVIDIA with 6GB VRAM | RTX 3060+ with 8GB+ VRAM |
+| **CPU** | 8 cores | 12+ cores (for parallel mixing) |
+| **RAM** | 16GB | 32GB |
+| **Storage** | 50GB free | 100GB+ (for models and temp files) |
+| **OS** | Windows 10/11, Linux | Windows 11, Ubuntu 22.04+ |
 
-# Create worker venvs (each has its own dependencies)
-cd workers/separation && python -m venv venv && venv\Scripts\pip install -r requirements.txt
-cd ../transcription && python -m venv venv && venv\Scripts\pip install -r requirements.txt
-cd ../diarization && python -m venv venv && venv\Scripts\pip install -r requirements.txt
-cd ../translation && python -m venv venv && venv\Scripts\pip install -r requirements.txt
-cd ../tts && python -m venv venv && venv\Scripts\pip install -r requirements.txt
-cd ../mixing && python -m venv venv && venv\Scripts\pip install -r requirements.txt
-```
+> **Optimized for:** MSI Crosshair 18 HX (Intel Core Ultra 9 275HX, NVIDIA RTX 5070 8GB, 32GB RAM)
 
-## Usage
+---
 
-### Submit a Video
-
-```bash
-tidaldub submit movie.mp4 --audio-langs es,fr,de --subtitle-langs es,fr,de,ja
-```
-
-### Check Status
-
-```bash
-tidaldub status job_abc123def456
-```
-
-### List All Jobs
-
-```bash
-tidaldub list
-```
-
-### Resume Crashed Job
-
-```bash
-tidaldub resume job_abc123def456
-```
-
-### Manage Dead Letter Queue
-
-```bash
-tidaldub dlq list
-tidaldub dlq retry dlq_item_id
-```
-
-## Architecture
+## 📁 Project Structure
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                               TidalDub                                          │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│  Orchestrator ──► File FSM (ground truth) ──► SQLite (queries) ──► Redis (opt) │
-│       │                                                                          │
-│       ▼                                                                          │
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  │
-│  │Separation│─►│Transcribe│─►│Diarize │─►│Translate│─►│  TTS   │─►│  Mix    │  │
-│  │ Demucs  │  │ Whisper │  │pyannote │  │SeamlessM4T│ │Coqui   │  │ FFmpeg  │  │
-│  └─────────┘  └─────────┘  └─────────┘  └─────────┘  └─────────┘  └─────────┘  │
-└─────────────────────────────────────────────────────────────────────────────────┘
+TidalDub/
+├── config.yaml              # Main configuration file
+├── pyproject.toml           # Python dependencies (uv/pip)
+├── uv.toml                  # uv workspace configuration
+│
+├── tidaldub/                # Core package
+│   ├── cli.py               # Command-line interface
+│   ├── orchestrator.py      # Pipeline coordinator
+│   ├── recovery.py          # Crash recovery system
+│   ├── muxer.py             # Video/audio muxing
+│   ├── async_worker.py      # Async worker framework
+│   ├── state/               # State management
+│   │   ├── fsm.py           # File-based state machine
+│   │   ├── database.py      # SQLite cache
+│   │   └── events.py        # Event logging
+│   ├── queues/              # Queue infrastructure
+│   │   └── manager.py       # Redis/SQLite queue manager
+│   └── workers/             # Worker base classes
+│       └── base.py          # GPU-optimized base worker
+│
+├── workers/                 # AI Pipeline Workers
+│   ├── separation/          # Demucs audio separation
+│   ├── transcription/       # faster-whisper STT
+│   ├── diarization/         # pyannote speaker ID
+│   ├── translation/         # SeamlessM4T translation
+│   ├── tts/                 # Coqui XTTS voice cloning
+│   └── mixing/              # Professional audio mixing
+│
+├── data/                    # Runtime data (created on first run)
+│   ├── input/               # Place source videos here
+│   ├── temp/                # Intermediate processing files
+│   └── output/              # Final dubbed videos
+│
+├── state/                   # Job state files (FSM)
+├── logs/                    # Application logs
+└── models/                  # Downloaded AI models (~20GB)
 ```
 
-## Configuration
+---
 
-Edit `config.yaml` to customize:
+## 🚀 Quick Start
+
+### 1. Install Prerequisites
+
+```powershell
+# Windows (PowerShell as Admin)
+winget install Python.Python.3.13
+winget install astral-sh.uv
+winget install Gyan.FFmpeg
+# Install CUDA Toolkit from: https://developer.nvidia.com/cuda-downloads
+```
+
+### 2. Setup Project
+
+```powershell
+cd TidalDub
+uv sync --all-packages
+```
+
+### 3. Set HuggingFace Token (for pyannote)
+
+```powershell
+# Get token from: https://huggingface.co/settings/tokens
+# Accept terms at: https://huggingface.co/pyannote/speaker-diarization-3.1
+$env:HUGGINGFACE_TOKEN = "your_token_here"
+```
+
+### 4. Run TidalDub
+
+```powershell
+# Place your video in data/input/
+uv run tidaldub submit data/input/myVideo.mp4 --audio-langs es,fr,de
+
+# Check progress
+uv run tidaldub status <job_id>
+```
+
+---
+
+## 📖 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [SETUP.md](./SETUP.md) | Detailed installation and configuration guide |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | System architecture and component details |
+| [RUNNING.md](./RUNNING.md) | How to run jobs, monitor progress, troubleshoot |
+
+---
+
+## 🎯 Supported Languages
+
+**Audio Dubbing (10 languages):**
+Spanish, French, German, Portuguese, Italian, Japanese, Korean, Chinese, Hindi, Arabic
+
+**Subtitles (15 languages):**
+All audio languages plus Russian, Dutch, Polish, Turkish, Vietnamese
+
+> SeamlessM4T supports 100+ languages. Edit `config.yaml` to add more.
+
+---
+
+## ⚡ Performance Optimizations
+
+TidalDub is optimized for maximum performance:
+
+- **torch.compile** with `reduce-overhead` mode → 2-3x faster inference
+- **Flash Attention 2** → 50% less VRAM usage
+- **Parallel Mixing** → 4 concurrent workers for CPU tasks
+- **Redis Pub/Sub** → Instant task notifications (no polling)
+- **Pipeline Streaming** → Next stage starts at 50% completion
+- **CUDA Graphs** → Reduced kernel launch overhead
+
+---
+
+## 🔧 Configuration
+
+Key settings in `config.yaml`:
 
 ```yaml
+# Quality preset (fast/balanced/quality)
+quality:
+  preset: "balanced"
+
 # Target languages
 languages:
   audio: [es, fr, de, ja, ko]
   subtitles: [es, fr, de, ja, ko, zh, ru]
 
-# Quality preset (fast / balanced / quality)
-quality:
-  preset: balanced
+# Parallel CPU workers
+workers:
+  mixing: 4
 ```
 
-## Project Structure
+---
 
-```
-tidal-whirlpool/
-├── config.yaml              # Global configuration
-├── tidaldub/                # Main package
-│   ├── cli.py               # Command-line interface
-│   ├── orchestrator.py      # Pipeline coordinator
-│   ├── recovery.py          # Crash recovery
-│   ├── muxer.py             # Video muxing
-│   ├── state/               # Reliability layer
-│   │   ├── fsm.py           # File-based FSM
-│   │   ├── database.py      # SQLite state
-│   │   └── events.py        # Event logging
-│   ├── queues/              # Queue infrastructure
-│   │   └── manager.py       # Queue manager
-│   └── workers/             # Worker framework
-│       └── base.py          # Base worker class
-├── workers/                 # Isolated worker venvs
-│   ├── separation/          # Demucs
-│   ├── transcription/       # Whisper
-│   ├── diarization/         # pyannote
-│   ├── translation/         # SeamlessM4T
-│   ├── tts/                 # Coqui XTTS
-│   └── mixing/              # Audio mixing
-├── state/                   # Runtime state (FSM files)
-├── data/                    # Processing data
-│   ├── input/               # Source videos
-│   ├── temp/                # Intermediate files
-│   └── output/              # Final outputs
-└── models/                  # Downloaded AI models
-```
+## 📜 License
 
-## License
+MIT License - See [LICENSE](./LICENSE) for details.
 
-MIT License - See LICENSE file for details.
+---
+
+<p align="center">
+  <b>TidalDub</b> - Professional video dubbing, fully local, powered by AI
+</p>
