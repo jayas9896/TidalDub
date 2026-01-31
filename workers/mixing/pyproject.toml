@@ -2,11 +2,11 @@
 name = "tidaldub-mixing"
 version = "0.1.0"
 description = "Professional audio mixing worker"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 
 dependencies = [
     # Audio processing - no GPU needed
-    "numpy>=1.24.0,<2.0.0",
+    "numpy>=2.2.2",
     "scipy>=1.15.1",
     
     # PyDub for audio manipulation
